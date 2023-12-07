@@ -41,7 +41,11 @@ public class MainActivity extends AppCompatActivity {
     private static final String errorConvert = "Error convert!";
     private static final int REQUEST_IMAGE1_CAPTURE = 1;
 
+    @BindView(R.id.ocr_image)
+    ImageView firstImage;
 
+    @BindView(R.id.ocr_text)
+    TextView ocrText;
 
     int PERMISSION_ALL = 1;
     boolean flagPermissions = true;
@@ -67,6 +71,49 @@ public class MainActivity extends AppCompatActivity {
         String language = "eng";
         mTessOCR = new TesseractOCR(this, language);
     }
+
+    @Override
+    protected void onActivityResult(int requestcode, int resultcode, @Nullable Intent data) {
+        super.onActivityResult(requestcode, resultcode, data);
+
+        switch (requestcode) {
+            case REQUEST_IMAGE1_CAPTURE: {
+                if (resultcode == RESULT_OK) {
+                    Bitmap bmp = null;
+                    try {
+                        InputStream is = context.getContentResolver().openInputStream(photoURI1);
+                        BitmapFactory.Options options = new BitmapFactory.Options();
+                        bmp = BitmapFactory.decodeStream(is, null, options);
+                    } catch (Exception ex) {
+                        Log.i(getClass().getSimpleName(), ex.getMessage());
+                        Toast.makeText(context, errorConvert, Toast.LENGTH_SHORT).show();
+                    }
+
+                    firstImage.setImageBitmap(bmp);
+                    doOCR(bmp);
+
+                    OutputStream os;
+                    try {
+                        os = new FileOutputStream(photoURI1.getPath());
+                        if (bmp != null) {
+                            bmp.compress(Bitmap.CompressFormat.JPEG, 100, os);
+                        }
+                        os.flush();
+                        os.close();
+                        } catch (Exception ex) {
+                        Log.e(getClass().getSimpleName(), ex.getMessage());
+                        Toast.makeText(context, errorFileCreate, Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                else {
+                    photoURI1 = oldPhotoURI;
+                    firstImage.setImageURI(photoURI1);
+
+                    }
+                }
+            }
+        }
 
     void checkPermissions() {
         if (!hasPermissions(context, PERMISSIONS)) {
@@ -130,6 +177,30 @@ public class MainActivity extends AppCompatActivity {
                 startActivityForResult(takePictureIntent, REQUEST_IMAGE1_CAPTURE);
             }
         }
+    }
+
+    private void doOCR(final Bitmap bitmap) {
+        if (mProgressDialog == null) {
+            mProgressDialog = ProgressDialog.show(this, "Processing", "Doing OCR...", true);
+        }
+        else {
+            mProgressDialog.show();
+        }
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                final String srcText = mTessOCR.getOCRResult(bitmap);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (srcText != null && !srcText.equals("")) {
+                            ocrText.setText(srcText);
+                        }
+                        mProgressDialog.dismiss();
+                    }
+                });
+            }
+        }).start();
     }
 
 }
