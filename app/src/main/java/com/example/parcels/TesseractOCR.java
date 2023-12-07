@@ -25,7 +25,7 @@ public class TesseractOCR {
 
         AssetManager assetManager = context.getAssets();
 
-        String dstPathDir = "/tessract/tessdata/";
+        String dstPathDir = "/tesseract/tessdata/";
 
         String srcFile = "eng.traineddata";
         InputStream inFile = null;
