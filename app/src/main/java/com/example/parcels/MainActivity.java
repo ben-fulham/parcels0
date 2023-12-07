@@ -16,9 +16,12 @@ import androidx.core.app.ActivityCompat;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.example.parcels.databinding.ActivityMainBinding;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -41,11 +44,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String errorConvert = "Error convert!";
     private static final int REQUEST_IMAGE1_CAPTURE = 1;
 
-    @BindView(R.id.ocr_image)
-    ImageView firstImage;
-
-    @BindView(R.id.ocr_text)
-    TextView ocrText;
+    private ActivityMainBinding binding;
 
     int PERMISSION_ALL = 1;
     boolean flagPermissions = true;
@@ -58,7 +57,18 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        binding = ActivityMainBinding.inflate(getLayoutInflater());
+        View view = binding.getRoot();
+        setContentView(view);
+
+        binding.scanButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onClickScanButton();
+            }
+        });
+
+        //setContentView(R.layout.activity_main);
         context = MainActivity.this;
 
         //ButterKnife.bind(this);
@@ -89,7 +99,7 @@ public class MainActivity extends AppCompatActivity {
                         Toast.makeText(context, errorConvert, Toast.LENGTH_SHORT).show();
                     }
 
-                    firstImage.setImageBitmap(bmp);
+                    binding.ocrImage.setImageBitmap(bmp);
                     doOCR(bmp);
 
                     OutputStream os;
@@ -108,7 +118,7 @@ public class MainActivity extends AppCompatActivity {
 
                 else {
                     photoURI1 = oldPhotoURI;
-                    firstImage.setImageURI(photoURI1);
+                    binding.ocrImage.setImageURI(photoURI1);
 
                     }
                 }
@@ -151,7 +161,7 @@ public class MainActivity extends AppCompatActivity {
         return image;
     }
 
-    @OnClick(R.id.scan_button)
+    //@OnClick(R.id.scan_button)
     void onClickScanButton() {
         // check permissions
         if (!flagPermissions) {
@@ -194,7 +204,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         if (srcText != null && !srcText.equals("")) {
-                            ocrText.setText(srcText);
+                            binding.ocrText.setText(srcText);
                         }
                         mProgressDialog.dismiss();
                     }
