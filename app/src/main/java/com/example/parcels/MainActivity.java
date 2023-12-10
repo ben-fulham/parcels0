@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
     private ProgressDialog mProgressDialog;
     private TesseractOCR mTessOCR;
     private Context context;
-    private String mCurrentPhotoPath;
+    protected String mCurrentPhotoPath;
     private Uri photoURI1;
     private Uri oldPhotoURI;
 
@@ -66,10 +66,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        //setContentView(R.layout.activity_main);
         context = MainActivity.this;
 
-        //ButterKnife.bind(this);
         StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
         StrictMode.setVmPolicy(builder.build());
 
@@ -159,7 +157,6 @@ public class MainActivity extends AppCompatActivity {
         return image;
     }
 
-    //@OnClick(R.id.scan_button)
     void onClickScanButton() {
         // check permissions
         if (!flagPermissions) {
